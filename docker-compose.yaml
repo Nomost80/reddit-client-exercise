@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  database:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: $PG_PWD
+      POSTGRES_DB: $PG_DB
+    volumes:
+      - "${PG_HOME}:/var/lib/postgresql"
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
