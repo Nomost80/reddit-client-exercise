@@ -18,6 +18,7 @@ const typeDefs = gql`
     icon: String
     description: String!
     subscribers: Int!
+    bookmarked: Boolean!
   }
   type Post {
     id: ID!
@@ -36,22 +37,26 @@ const typeDefs = gql`
     postDetail(permalink: String!): [PostDetail]
   }
   type Mutation {
-    bookmarkSubReddit(id: ID): Boolean
-    unbookmarkSubReddit(id: ID): Boolean
+    bookmarkSubReddit(id: String!): Boolean
+    unbookmarkSubReddit(id: String!): Boolean
   }
 `
 
 const resolvers = {
   Query: {
-    subReddits: async (root, { title }, { dataSources }) => {
+    subReddits: async (root, { title }, { dataSources, user }) => {
+      const userId = user.name
       const response = await dataSources.redditAPI.searchSubReddits(title)
+      const bookmarkedSrs = (await db('bookmarks').where({ user_id: userId }).select('sr_id')).map(srFields => srFields.sr_id)
+      console.log(bookmarkedSrs)
       return response.data.children.map(({ data: subReddit }) => ({
         id: subReddit.id,
         url: subReddit.url,
         title: subReddit.title,
         icon: subReddit.icon_img,
         description: subReddit.public_description,
-        subscribers: subReddit.subscribers
+        subscribers: subReddit.subscribers,
+        bookmarked: bookmarkedSrs.includes(subReddit.id)
       }))
     },
     posts: async (root, { subRedditUrl }, { dataSources }) => {
@@ -72,13 +77,15 @@ const resolvers = {
   },
 
   Mutation: {
-    bookmarkSubReddit: (root, { id }, { context }) => {
-      const userId = context.user.name
-      return !!db('bookmarks').insert({ user_id: userId, sr_id: id }, ['id'])
+    bookmarkSubReddit: async (root, { id }, { user }) => {
+      const userId = user.name
+      const result = await db('bookmarks').insert({ user_id: userId, sr_id: id }, ['id'])
+      return result.length
     },
-    unbookmarkSubReddit: (root, { id }, { context }) => {
-      const userId = context.user.name
-      return !!db('bookmarks').where({ user_id: userId, sr_id: id }).del()
+    unbookmarkSubReddit: async (root, { id }, { user }) => {
+      const userId = user.name
+      const result = await db('bookmarks').where({ user_id: userId, sr_id: id }).del()
+      return !!result
     }
   },
 }

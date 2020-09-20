@@ -2,6 +2,7 @@ import { ApolloProvider } from '@apollo/client'
 import ApolloClient from '../lib/apolloClient'
 import Layout from '../components/layout'
 import { useFetchUser } from '../lib/user'
+import { SearchSubReddits } from '../components/searchSubReddits'
 
 function Home() {
   const { user, loading } = useFetchUser()
@@ -31,6 +32,7 @@ function Home() {
             <img src={user.picture} alt="user picture" />
             <p>nickname: {user.nickname}</p>
             <p>name: {user.name}</p>
+            <SearchSubReddits/>
           </>
         )}
       </Layout>
