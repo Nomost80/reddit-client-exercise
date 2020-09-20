@@ -1,9 +1,14 @@
 import knex from "knex"
 import { ApolloServer, gql } from "apollo-server-micro"
+import NodeCache from 'node-cache'
+import axios from 'axios'
+import qs from 'qs'
 import { RedditAPI } from '../../lib/reddit'
 import auth0 from '../../lib/auth0'
 
-const { NODE_ENV, PG_CONNECTION_STRING } = process.env
+const { NODE_ENV, PG_CONNECTION_STRING, REDDIT_AUTH_HEADER } = process.env
+
+const cache = new NodeCache({ stdTTL: 60 })
 
 const db = knex({
   client: "pg",
@@ -48,7 +53,6 @@ const resolvers = {
       const userId = user.name
       const response = await dataSources.redditAPI.searchSubReddits(title)
       const bookmarkedSrs = (await db('bookmarks').where({ user_id: userId }).select('sr_id')).map(srFields => srFields.sr_id)
-      console.log(bookmarkedSrs)
       return response.data.children.map(({ data: subReddit }) => ({
         id: subReddit.id,
         url: subReddit.url,
@@ -90,12 +94,31 @@ const resolvers = {
   },
 }
 
+const getRedditAuthHeader = async () => {
+  let redditAuthorizationHeader = cache.get('reddit-auth-header')
+  if (redditAuthorizationHeader) return redditAuthorizationHeader
+  const headers = {
+    authorization: REDDIT_AUTH_HEADER
+  }
+  const body = qs.stringify({
+    grant_type: 'client_credentials',
+    scope: 'read'
+  })
+  const { data } = await axios.post('https://www.reddit.com/api/v1/access_token', body, { headers })
+  const { token_type, access_token, expires_in } = data
+  redditAuthorizationHeader = `${token_type} ${access_token}`
+  cache.set('reddit-auth-header', redditAuthorizationHeader, expires_in)
+  return redditAuthorizationHeader
+}
+
 const context = async ({ req }) => {
+  const redditAuthorizationHeader = await getRedditAuthHeader()
   const session = await auth0.getSession(req)
   if ((!session || !session.user) && NODE_ENV !== 'development') {
     throw Error('You must be logged in')
   }
   return {
+    redditAuthorizationHeader,
     user: session && session.user
   }
 }

@@ -1,7 +1,4 @@
 import { RESTDataSource } from "apollo-datasource-rest"
-import qs from 'qs'
-
-const { REDDIT_AUTH_HEADER } = process.env
 
 export class RedditAPI extends RESTDataSource {
   constructor() {
@@ -10,7 +7,7 @@ export class RedditAPI extends RESTDataSource {
   }
 
   async willSendRequest(request) {
-    request.headers.set('Authorization', REDDIT_AUTH_HEADER)
+    request.headers.set('Authorization', this.context.redditAuthorizationHeader)
   }
 
   async searchSubReddits(query: string) {
