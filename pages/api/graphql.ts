@@ -1,8 +1,14 @@
+import knex from "knex"
 import { ApolloServer, gql } from "apollo-server-micro"
 import { RedditAPI } from '../../lib/reddit'
 import auth0 from '../../lib/auth0'
 
-const { NODE_ENV } = process.env
+const { NODE_ENV, PG_CONNECTION_STRING } = process.env
+
+const db = knex({
+  client: "pg",
+  connection: PG_CONNECTION_STRING
+})
 
 const typeDefs = gql`
   type SubReddit {
@@ -31,6 +37,7 @@ const typeDefs = gql`
   }
   type Mutation {
     bookmarkSubReddit(id: ID): Boolean
+    unbookmarkSubReddit(id: ID): Boolean
   }
 `
 
@@ -65,8 +72,13 @@ const resolvers = {
   },
 
   Mutation: {
-    bookmarkSubReddit: (root, args) => {
-
+    bookmarkSubReddit: (root, { id }, { context }) => {
+      const userId = context.user.name
+      return !!db('bookmarks').insert({ user_id: userId, sr_id: id }, ['id'])
+    },
+    unbookmarkSubReddit: (root, { id }, { context }) => {
+      const userId = context.user.name
+      return !!db('bookmarks').where({ user_id: userId, sr_id: id }).del()
     }
   },
 }

@@ -13,8 +13,10 @@
     "apollo-datasource-rest": "^0.9.3",
     "apollo-server-micro": "^2.17.0",
     "axios": "^0.20.0",
+    "knex": "^0.21.5",
     "next": "latest",
     "node-cache": "^5.1.2",
+    "pg": "^8.3.3",
     "qs": "^6.9.4",
     "react": "^16.12.0",
     "react-dom": "^16.12.0"
