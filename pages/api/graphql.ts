@@ -51,9 +51,12 @@ const resolvers = {
   Query: {
     subReddits: async (root, { title }, { dataSources, user }) => {
       const userId = user.name
-      const response = await dataSources.redditAPI.searchSubReddits(title)
-      const bookmarkedSrs = (await db('bookmarks').where({ user_id: userId }).select('sr_id')).map(srFields => srFields.sr_id)
-      return response.data.children.map(({ data: subReddit }) => ({
+      const [redditResponse, bookmarkedSrsFields] = await Promise.all([
+        dataSources.redditAPI.searchSubReddits(title),
+        db('bookmarks').where({ user_id: userId }).select('sr_id')
+      ])
+      const bookmarkedSrs = bookmarkedSrsFields.map(srFields => srFields.sr_id)
+      return redditResponse.data.children.map(({ data: subReddit }) => ({
         id: subReddit.id,
         url: subReddit.url,
         title: subReddit.title,
