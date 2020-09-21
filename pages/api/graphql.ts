@@ -47,6 +47,7 @@ const typeDefs = gql`
     subReddits(title: String!): [SubReddit]
     posts(slug: String!): [Post]
     comments(subRedditSlug: String!, postSlug: String!): [Comment]
+    bookmarkedSubReddits: [SubReddit]
   }
   type Mutation {
     bookmarkSubReddit(id: String!): Boolean
@@ -64,14 +65,14 @@ const resolvers = {
       ])
       const bookmarkedSrs = bookmarkedSrsFields.map(srFields => srFields.sr_id)
       return redditResponse.data.children.map(({ data: subReddit }) => ({
-        id: subReddit.id,
+        id: subReddit.name,
         slug: subReddit.display_name,
         url: subReddit.url,
         title: subReddit.title,
         icon: subReddit.icon_img,
         description: subReddit.public_description,
         subscribers: subReddit.subscribers,
-        bookmarked: bookmarkedSrs.includes(subReddit.id)
+        bookmarked: bookmarkedSrs.includes(subReddit.name)
       }))
     },
     posts: async (root, { slug }, { dataSources }) => {
@@ -87,9 +88,7 @@ const resolvers = {
     },
     comments: async (root,  { subRedditSlug, postSlug }, { dataSources }) => {
       const response = await dataSources.redditAPI.getPostDetail(subRedditSlug, postSlug)
-      console.log(response)
       const commentListing = response.find(({ data }) => data.children.length && data.children[0].kind === 't1')
-      console.log(commentListing)
       return commentListing ? commentListing.data.children.filter(({ data }) => data.body ).map(({ data: comment }) => ({
         id: comment.id,
         ups: comment.ups,
@@ -99,6 +98,21 @@ const resolvers = {
         replies: [],
         created: comment.created_utc
       })) : []
+    },
+    bookmarkedSubReddits: async (root, args, { dataSources, user }) => {
+      const userId = user.name
+      const bookmarkedIds = await db('bookmarks').where({ user_id: userId }).select('sr_id')
+      const response = await dataSources.redditAPI.getItemsInfo(bookmarkedIds.map(fields => fields.sr_id))
+      return response.data.children.map(({ data: subReddit }) => ({
+        id: subReddit.name,
+        slug: subReddit.display_name,
+        url: subReddit.url,
+        title: subReddit.title,
+        icon: subReddit.icon_img,
+        description: subReddit.public_description,
+        subscribers: subReddit.subscribers,
+        bookmarked: true
+      }))
     }
   },
 

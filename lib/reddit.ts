@@ -21,4 +21,8 @@ export class RedditAPI extends RESTDataSource {
   async getPostDetail(subRedditSlug: string, postSlug: string) {
     return this.get(`/r/${subRedditSlug}/comments/${postSlug}`, { limit: 3 })
   }
+
+  async getItemsInfo(ids: string[]) {
+    return this.get('/api/info', { id: ids.join(',') })
+  }
 }

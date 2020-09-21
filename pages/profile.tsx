@@ -1,7 +1,8 @@
-// This import is only needed when checking authentication status directly from getInitialProps
-// import auth0 from '../lib/auth0'
+import { ApolloProvider } from '@apollo/client'
+import ApolloClient from '../lib/apolloClient'
 import { useFetchUser } from '../lib/user'
 import Layout from '../components/layout'
+import { GetBookmarkedSubReddits } from "../components/getBookmarkedSubReddits";
 
 function ProfileCard({ user }) {
   return (
@@ -9,10 +10,10 @@ function ProfileCard({ user }) {
       <h1>Profile</h1>
 
       <div>
-        <h3>Profile (client rendered)</h3>
         <img src={user.picture} alt="user picture" />
         <p>nickname: {user.nickname}</p>
         <p>name: {user.name}</p>
+        <GetBookmarkedSubReddits />
       </div>
     </>
   )
@@ -22,9 +23,11 @@ function Profile() {
   const { user, loading } = useFetchUser({ required: true })
 
   return (
-    <Layout user={user} loading={loading}>
-      {loading ? <>Loading...</> : <ProfileCard user={user} />}
-    </Layout>
+    <ApolloProvider client={ApolloClient}>
+      <Layout user={user} loading={loading}>
+        {loading ? <>Loading...</> : <ProfileCard user={user} />}
+      </Layout>
+    </ApolloProvider>
   )
 }
 

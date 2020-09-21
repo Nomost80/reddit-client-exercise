@@ -16,7 +16,6 @@ const GET_COMMENTS_QUERY = gql`
 `
 
 export function PostItem() {
-  console.log('post item')
   const router = useRouter()
   const { slug, pslug } = router.query
   const variables = { subRedditSlug: slug, postSlug: pslug.join('/') }
