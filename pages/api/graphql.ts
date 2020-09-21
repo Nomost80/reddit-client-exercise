@@ -18,6 +18,7 @@ const db = knex({
 const typeDefs = gql`
   type SubReddit {
     id: ID!
+    slug: String!
     url: String!
     title: String!
     icon: String
@@ -33,13 +34,19 @@ const typeDefs = gql`
     commentsNumber: Int!
     permalink: String!
   }
-  type PostDetail {
+  type Comment {
     id: ID!
+    ups: Int!
+    downs: Int!
+    replies: [Comment]
+    author: String!
+    body: String!
+    created: String!
   }
   type Query {
     subReddits(title: String!): [SubReddit]
-    posts(subRedditUrl: String!): [Post]
-    postDetail(permalink: String!): [PostDetail]
+    posts(slug: String!): [Post]
+    comments(subRedditSlug: String!, postSlug: String!): [Comment]
   }
   type Mutation {
     bookmarkSubReddit(id: String!): Boolean
@@ -58,6 +65,7 @@ const resolvers = {
       const bookmarkedSrs = bookmarkedSrsFields.map(srFields => srFields.sr_id)
       return redditResponse.data.children.map(({ data: subReddit }) => ({
         id: subReddit.id,
+        slug: subReddit.display_name,
         url: subReddit.url,
         title: subReddit.title,
         icon: subReddit.icon_img,
@@ -66,8 +74,8 @@ const resolvers = {
         bookmarked: bookmarkedSrs.includes(subReddit.id)
       }))
     },
-    posts: async (root, { subRedditUrl }, { dataSources }) => {
-      const response = await dataSources.redditAPI.getSubRedditNewPosts(subRedditUrl)
+    posts: async (root, { slug }, { dataSources }) => {
+      const response = await dataSources.redditAPI.getSubRedditNewPosts(slug)
       return response.data.children.map(({ data: post }) => ({
         id: post.id,
         title: post.title,
@@ -77,9 +85,20 @@ const resolvers = {
         commentsNumber: post.num_comments
       }))
     },
-    postDetail: async (root,  { permalink }, { dataSources }) => {
-      const response = await dataSources.redditAPI.getPostComments(permalink)
-      return response.map(a => a)
+    comments: async (root,  { subRedditSlug, postSlug }, { dataSources }) => {
+      const response = await dataSources.redditAPI.getPostDetail(subRedditSlug, postSlug)
+      console.log(response)
+      const commentListing = response.find(({ data }) => data.children.length && data.children[0].kind === 't1')
+      console.log(commentListing)
+      return commentListing ? commentListing.data.children.filter(({ data }) => data.body ).map(({ data: comment }) => ({
+        id: comment.id,
+        ups: comment.ups,
+        downs: comment.downs,
+        author: comment.author,
+        body: comment.body,
+        replies: [],
+        created: comment.created_utc
+      })) : []
     }
   },
 

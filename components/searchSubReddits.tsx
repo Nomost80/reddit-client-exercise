@@ -8,6 +8,7 @@ const SEARCH_SUB_REDDITS_QUERY = gql`
   query SearchSubReddits($title: String!) {
     subReddits(title: $title) {
       id,
+      slug
       url,
       title,
       icon,

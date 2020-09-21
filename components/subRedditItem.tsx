@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import Link from 'next/link'
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
@@ -21,7 +22,7 @@ const UNBOOKMARK_SR_MUTATION = gql`
   }
 `
 
-export function SubRedditItem({ id, url, title, icon, description, subscribers, bookmarked }) {
+export function SubRedditItem({ id, slug, url, title, icon, description, subscribers, bookmarked }) {
   console.log(id, bookmarked)
   const [currentlyBookmarked, setBookmark] = useState(bookmarked)
   const setBookmarked = ({ bookmarkSubReddit }) => bookmarkSubReddit && setBookmark(true)
@@ -38,16 +39,18 @@ export function SubRedditItem({ id, url, title, icon, description, subscribers, 
   }
 
   return (
-    <ListItem>
-      <ListItemAvatar>
-        <Avatar src={icon} />
-      </ListItemAvatar>
-      <ListItemText primary={title} secondary={description} />
-      <ListItemSecondaryAction>
-        <IconButton edge="end" onClick={handleBookmarkClick}>
-          {currentlyBookmarked ? <StarIcon/> : <StarBorderIcon/>}
-        </IconButton>
-      </ListItemSecondaryAction>
-    </ListItem>
+    <Link href={`/subreddits/${slug}`}>
+      <ListItem>
+        <ListItemAvatar>
+          <Avatar src={icon} />
+        </ListItemAvatar>
+        <ListItemText primary={title} secondary={description} />
+        <ListItemSecondaryAction>
+          <IconButton edge="end" onClick={handleBookmarkClick}>
+            {currentlyBookmarked ? <StarIcon/> : <StarBorderIcon/>}
+          </IconButton>
+        </ListItemSecondaryAction>
+      </ListItem>
+    </Link>
   )
 }

@@ -14,11 +14,11 @@ export class RedditAPI extends RESTDataSource {
     return this.get('/api/subreddit_autocomplete_v2', { query, limit: 10 })
   }
 
-  async getSubRedditNewPosts(subRedditUrl: string) {
-    return this.get(`${subRedditUrl}/new`, { limit: 100 })
+  async getSubRedditNewPosts(slug: string) {
+    return this.get(`/r/${slug}/new`, { limit: 100 })
   }
 
-  async getPostComments(permalink: string) {
-    return this.get(permalink, { limit: 3 })
+  async getPostDetail(subRedditSlug: string, postSlug: string) {
+    return this.get(`/r/${subRedditSlug}/comments/${postSlug}`, { limit: 3 })
   }
 }
