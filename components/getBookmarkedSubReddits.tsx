@@ -1,5 +1,6 @@
 import { useQuery, gql } from '@apollo/client'
-import { SubRedditItem } from "./subRedditItem";
+import { SubRedditItem } from "./subRedditItem"
+import List from '@material-ui/core/List'
 
 const GET_BOOKMARKED_SUB_REDDITS_QUERY = gql`
   query GetBookmarkedSubReddits {
@@ -19,5 +20,9 @@ const GET_BOOKMARKED_SUB_REDDITS_QUERY = gql`
 export function GetBookmarkedSubReddits() {
   const { loading, error, data } = useQuery(GET_BOOKMARKED_SUB_REDDITS_QUERY)
 
-  return data ? data.bookmarkedSubReddits.map(sr => <SubRedditItem id={sr.id} {...sr} />) : null
+  return data ? (
+    <List>
+      {data.bookmarkedSubReddits.map(sr => <SubRedditItem key={sr.id} {...sr} />)}
+    </List>
+  ) : null
 }

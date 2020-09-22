@@ -5,7 +5,7 @@
 3. `docker-compose --env-file .env.local up`
 4. `node_modules/.bin/knex migrate:make create_bookmarks`
 5. `npm run dev`
-6. go to [http://localhost:3000]
+6. go to <http://localhost:3000>
 
 # Difficultés rencontrées
 * Pas d'api key possible avec Reddit
@@ -17,6 +17,8 @@ J'aurais pu améliorer certaines choses en prenant plus de temps mais j'imagine 
 J'ai passé environ 18-20 heures.
 
 ## Résultats
+Des screens sont disponibles dans le dossier docs.
+
 * l'UX/UI complétement à revoir
 * Des informations utiles sont manquantes: les commentaires en réponse à d'autres commentaires ne sont pas traités
 * Les hots topics ne sont pas pris en compte (que les new)

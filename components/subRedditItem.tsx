@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
+import ListItemAvatar from '@material-ui/core/ListItemAvatar'
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
 import Avatar from '@material-ui/core/Avatar'
-import IconButton from '@material-ui/core/IconButton';
-import StarIcon from '@material-ui/icons/Star';
-import StarBorderIcon from '@material-ui/icons/StarBorder';
+import IconButton from '@material-ui/core/IconButton'
+import StarIcon from '@material-ui/icons/Star'
+import StarBorderIcon from '@material-ui/icons/StarBorder'
 import { useMutation, gql } from '@apollo/client'
 
 const BOOKMAR_SR_MUTATION = gql`
@@ -23,7 +23,6 @@ const UNBOOKMARK_SR_MUTATION = gql`
 `
 
 export function SubRedditItem({ id, slug, url, title, icon, description, subscribers, bookmarked }) {
-  console.log(id, bookmarked)
   const [currentlyBookmarked, setBookmark] = useState(bookmarked)
   const setBookmarked = ({ bookmarkSubReddit }) => bookmarkSubReddit && setBookmark(true)
   const setUnbookmarked = ({ unbookmarkSubReddit }) => unbookmarkSubReddit && setBookmark(false)
@@ -40,7 +39,7 @@ export function SubRedditItem({ id, slug, url, title, icon, description, subscri
 
   return (
     <Link href={`/subreddits/${slug}`}>
-      <ListItem>
+      <ListItem style={{ cursor: 'pointer' }}>
         <ListItemAvatar>
           <Avatar src={icon} />
         </ListItemAvatar>

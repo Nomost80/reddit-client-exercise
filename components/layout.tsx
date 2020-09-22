@@ -1,10 +1,10 @@
 import Head from 'next/head'
 import CssBaseline from '@material-ui/core/CssBaseline'
-import Typography from '@material-ui/core/Typography';
-import Container from '@material-ui/core/Container';
-import Header from './header'
+import Typography from '@material-ui/core/Typography'
+import Container from '@material-ui/core/Container'
+import { Header } from './header'
 
-function Layout({ user, loading = false, children }) {
+export function Layout({ user, loading = false, children }) {
   return (
     <>
       <Head>
@@ -24,5 +24,3 @@ function Layout({ user, loading = false, children }) {
     </>
   )
 }
-
-export default Layout

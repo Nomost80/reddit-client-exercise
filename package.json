@@ -1,5 +1,5 @@
 {
-  "name": "auth0",
+  "name": "reddit-client",
   "scripts": {
     "dev": "next",
     "build": "next build",

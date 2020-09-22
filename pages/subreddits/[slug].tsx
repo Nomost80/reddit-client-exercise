@@ -1,16 +1,18 @@
 import React from 'react'
 import { ApolloProvider } from '@apollo/client'
 import ApolloClient from '../../lib/apolloClient'
-import { PostList } from "../../components/postList";
-import {useRouter} from "next/router";
+import { useFetchUser } from "../../lib/user"
+import { Layout } from '../../components/layout'
+import { PostList } from "../../components/postList"
 
 export default function SubRedditDetail() {
-  const router = useRouter()
-  const { slug } = router.query
-  console.log(slug)
+  const { user, loading } = useFetchUser({ required: true })
+
   return (
     <ApolloProvider client={ApolloClient}>
-      <PostList />
+      <Layout user={user} loading={loading}>
+        <PostList />
+      </Layout>
     </ApolloProvider>
   )
 }

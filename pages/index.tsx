@@ -1,10 +1,10 @@
 import { ApolloProvider } from '@apollo/client'
 import ApolloClient from '../lib/apolloClient'
-import Layout from '../components/layout'
+import { Layout } from '../components/layout'
 import { useFetchUser } from '../lib/user'
 import { SearchSubReddits } from '../components/searchSubReddits'
 
-function Home() {
+export default function Home() {
   const { user, loading } = useFetchUser()
 
   return (
@@ -23,5 +23,3 @@ function Home() {
     </ApolloProvider>
   )
 }
-
-export default Home

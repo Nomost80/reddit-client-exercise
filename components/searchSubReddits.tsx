@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { TextField, Button } from "@material-ui/core";
-import SearchIcon from '@material-ui/icons/Search';
+import { TextField, Button, List } from "@material-ui/core"
+import SearchIcon from '@material-ui/icons/Search'
 import { useLazyQuery, gql } from '@apollo/client'
 import { SubRedditItem } from './subRedditItem'
 
@@ -29,7 +29,7 @@ export function SearchSubReddits() {
   const handleClick = event => {
     searchSubReddits({ variables: { title }})
   }
-  console.log(data)
+
   return (
     <>
       <form noValidate autoComplete="off">
@@ -38,7 +38,9 @@ export function SearchSubReddits() {
           Rechercher
         </Button>
       </form>
-      {data && data.subReddits.map(sr => <SubRedditItem key={sr.id} {...sr} />)}
+      <List>
+        {data && data.subReddits.map(sr => <SubRedditItem key={sr.id} {...sr} />)}
+      </List>
     </>
   )
 }

@@ -55,6 +55,16 @@ const typeDefs = gql`
   }
 `
 
+const mapSubReddit = subReddit => ({
+  id: subReddit.name,
+  slug: subReddit.display_name,
+  url: subReddit.url,
+  title: subReddit.title,
+  icon: subReddit.icon_img,
+  description: subReddit.public_description,
+  subscribers: subReddit.subscribers
+})
+
 const resolvers = {
   Query: {
     subReddits: async (root, { title }, { dataSources, user }) => {
@@ -65,13 +75,7 @@ const resolvers = {
       ])
       const bookmarkedSrs = bookmarkedSrsFields.map(srFields => srFields.sr_id)
       return redditResponse.data.children.map(({ data: subReddit }) => ({
-        id: subReddit.name,
-        slug: subReddit.display_name,
-        url: subReddit.url,
-        title: subReddit.title,
-        icon: subReddit.icon_img,
-        description: subReddit.public_description,
-        subscribers: subReddit.subscribers,
+        ...mapSubReddit(subReddit),
         bookmarked: bookmarkedSrs.includes(subReddit.name)
       }))
     },
@@ -89,33 +93,30 @@ const resolvers = {
     comments: async (root,  { subRedditSlug, postSlug }, { dataSources }) => {
       const response = await dataSources.redditAPI.getPostDetail(subRedditSlug, postSlug)
       const commentListing = response.find(({ data }) => data.children.length && data.children[0].kind === 't1')
-      return commentListing ? commentListing.data.children.filter(({ data }) => data.body ).map(({ data: comment }) => ({
-        id: comment.id,
-        ups: comment.ups,
-        downs: comment.downs,
-        author: comment.author,
-        body: comment.body,
-        replies: [],
-        created: comment.created_utc
-      })) : []
+      return commentListing ?
+        commentListing.data.children
+          .filter(({ data }) => data.body )
+          .map(({ data: comment }) => ({
+            id: comment.id,
+            ups: comment.ups,
+            downs: comment.downs,
+            author: comment.author,
+            body: comment.body,
+            replies: [],
+            created: comment.created_utc
+          }))
+        : []
     },
     bookmarkedSubReddits: async (root, args, { dataSources, user }) => {
       const userId = user.name
       const bookmarkedIds = await db('bookmarks').where({ user_id: userId }).select('sr_id')
       const response = await dataSources.redditAPI.getItemsInfo(bookmarkedIds.map(fields => fields.sr_id))
       return response.data.children.map(({ data: subReddit }) => ({
-        id: subReddit.name,
-        slug: subReddit.display_name,
-        url: subReddit.url,
-        title: subReddit.title,
-        icon: subReddit.icon_img,
-        description: subReddit.public_description,
-        subscribers: subReddit.subscribers,
+        ...mapSubReddit(subReddit),
         bookmarked: true
       }))
     }
   },
-
   Mutation: {
     bookmarkSubReddit: async (root, { id }, { user }) => {
       const userId = user.name
@@ -127,7 +128,7 @@ const resolvers = {
       const result = await db('bookmarks').where({ user_id: userId, sr_id: id }).del()
       return !!result
     }
-  },
+  }
 }
 
 const getRedditAuthHeader = async () => {
@@ -150,7 +151,7 @@ const getRedditAuthHeader = async () => {
 const context = async ({ req }) => {
   const redditAuthorizationHeader = await getRedditAuthHeader()
   const session = await auth0.getSession(req)
-  if ((!session || !session.user) && NODE_ENV !== 'development') {
+  if (!session || !session.user) {
     throw Error('You must be logged in')
   }
   return {
